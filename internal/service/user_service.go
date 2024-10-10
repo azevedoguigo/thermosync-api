@@ -4,6 +4,7 @@ import (
 	"github.com/azevedoguigo/thermosync-api/internal/contract"
 	"github.com/azevedoguigo/thermosync-api/internal/domain"
 	"github.com/azevedoguigo/thermosync-api/internal/repository"
+	"github.com/azevedoguigo/thermosync-api/pkg"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -23,6 +24,10 @@ func NewUserService(repo repository.UserRepository) UserService {
 }
 
 func (s *userService) CreateUser(userDTO *contract.NewUserDTO) error {
+	if err := pkg.ValidateStruct(userDTO); err != nil {
+		return err
+	}
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userDTO.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
