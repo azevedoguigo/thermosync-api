@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/azevedoguigo/thermosync-api/config"
-	"github.com/azevedoguigo/thermosync-api/db"
 	"github.com/azevedoguigo/thermosync-api/internal/handler"
 	"github.com/azevedoguigo/thermosync-api/internal/repository"
 	"github.com/azevedoguigo/thermosync-api/internal/service"
@@ -14,8 +13,7 @@ import (
 )
 
 func main() {
-	cfg := config.LoadConfig()
-	db := db.InitDB(cfg)
+	db := config.InitDB()
 
 	userRepo := repository.NewUserRepository(db)
 	userService := service.NewUserService(userRepo)
