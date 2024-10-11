@@ -26,7 +26,11 @@ func (m *mockUserRepository) FindByEmail(email string) (*domain.User, error) {
 }
 
 func (m *mockUserRepository) FindByID(id uuid.UUID) (*domain.User, error) {
-	panic("unimplemented")
+	args := m.Called(id)
+	if user := args.Get(0); user != nil {
+		return user.(*domain.User), args.Error(1)
+	}
+	return nil, args.Error(1)
 }
 
 func TestUserService_CreateUser_Success(t *testing.T) {
@@ -273,4 +277,76 @@ func TestUserService_CreateUser_MustValidPasswordMaxLength(t *testing.T) {
 	err := userService.CreateUser(userDTO)
 
 	assert.Equal(t, "Password is required with max: 30", err.Error())
+}
+
+func TestUserService_FindUserByID_Success(t *testing.T) {
+	userID := uuid.New()
+
+	user := &domain.User{
+		ID:        userID,
+		FirstName: "Ayrton",
+		LastName:  "Senna",
+		Email:     "senna@example.com",
+		Password:  "supersenha",
+	}
+
+	mockRepo := new(mockUserRepository)
+	mockRepo.On("FindByID", userID).Return(user, nil)
+
+	userService := NewUserService(mockRepo)
+
+	foundedUser, err := userService.FindUserByID(userID)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, foundedUser)
+	assert.Equal(t, userID, foundedUser.ID)
+	assert.Equal(t, "Ayrton", foundedUser.FirstName)
+	assert.Equal(t, "Senna", foundedUser.LastName)
+
+	mockRepo.AssertNumberOfCalls(t, "FindByID", 1)
+}
+
+func TestUserService_FindUserByID_UserNotFound(t *testing.T) {
+	userID := uuid.New()
+
+	mockRepo := new(mockUserRepository)
+	mockRepo.On("FindByID", userID).Return(nil, errors.New("User not found"))
+
+	userService := NewUserService(mockRepo)
+
+	foundedUser, err := userService.FindUserByID(userID)
+
+	assert.Error(t, err)
+	assert.Nil(t, foundedUser)
+	assert.Equal(t, "User not found", err.Error())
+}
+
+func TestUserService_FindByID_InvalidUUIDFormat(t *testing.T) {
+	invalidID := uuid.UUID{}
+
+	mockRepo := new(mockUserRepository)
+	mockRepo.On("FindByID", invalidID).Return(nil, errors.New("invalid UUID format"))
+
+	userService := NewUserService(mockRepo)
+
+	foundedUser, err := userService.FindUserByID(invalidID)
+
+	assert.Error(t, err)
+	assert.Nil(t, foundedUser)
+	assert.Equal(t, "invalid UUID format", err.Error())
+}
+
+func TestUserService_FindByID_InvalidUUIDLength(t *testing.T) {
+	invalidID, _ := uuid.Parse("06c0dd0e-2b06-4986-bcc0-9")
+
+	mockRepo := new(mockUserRepository)
+	mockRepo.On("FindByID", invalidID).Return(nil, errors.New("invalid UUID length: 25"))
+
+	userService := NewUserService(mockRepo)
+
+	foundedUser, err := userService.FindUserByID(invalidID)
+
+	assert.Error(t, err)
+	assert.Nil(t, foundedUser)
+	assert.Equal(t, "invalid UUID length: 25", err.Error())
 }

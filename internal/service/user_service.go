@@ -11,7 +11,7 @@ import (
 
 type UserService interface {
 	CreateUser(userDTO *contract.NewUserDTO) error
-	GetUserByID(id uuid.UUID) (*domain.User, error)
+	FindUserByID(id uuid.UUID) (*domain.User, error)
 	Login(email, password string) (string, error)
 }
 
@@ -49,8 +49,13 @@ func (s *userService) CreateUser(userDTO *contract.NewUserDTO) error {
 	return nil
 }
 
-func (u *userService) GetUserByID(id uuid.UUID) (*domain.User, error) {
-	panic("unimplemented")
+func (s *userService) FindUserByID(id uuid.UUID) (*domain.User, error) {
+	user, err := s.userRepo.FindByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func (u *userService) Login(email string, password string) (string, error) {

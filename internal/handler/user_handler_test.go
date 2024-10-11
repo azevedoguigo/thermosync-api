@@ -23,15 +23,20 @@ func (m *mockUserService) CreateUser(userDTO *contract.NewUserDTO) error {
 	return args.Error(0)
 }
 
-func (m *mockUserService) GetUserByID(id uuid.UUID) (*domain.User, error) {
-	panic("unimplemented")
+func (m *mockUserService) FindUserByID(id uuid.UUID) (*domain.User, error) {
+	args := m.Called(id)
+	if user := args.Get(0); user != nil {
+		return user.(*domain.User), args.Error(0)
+	}
+
+	return nil, args.Error(1)
 }
 
 func (m *mockUserService) Login(email string, password string) (string, error) {
 	panic("unimplemented")
 }
 
-func TestCreateUserHandler_Success(t *testing.T) {
+func TestUserHandler_Create_Success(t *testing.T) {
 	requestBody, _ := json.Marshal(map[string]string{
 		"first_name": "Ayrton",
 		"last_name":  "Senna",
