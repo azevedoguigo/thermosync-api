@@ -28,6 +28,7 @@ func main() {
 
 	router.Route("/users", func(r chi.Router) {
 		r.Post("/", userHandler.CreateUser)
+		r.Get("/{id}", userHandler.FindUserByID)
 	})
 
 	log.Println("Server is running in port: 3000")
