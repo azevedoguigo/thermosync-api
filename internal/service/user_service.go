@@ -1,6 +1,8 @@
 package service
 
 import (
+	"errors"
+
 	"github.com/azevedoguigo/thermosync-api/internal/contract"
 	"github.com/azevedoguigo/thermosync-api/internal/domain"
 	"github.com/azevedoguigo/thermosync-api/internal/repository"
@@ -58,6 +60,16 @@ func (s *userService) FindUserByID(id uuid.UUID) (*domain.User, error) {
 	return user, nil
 }
 
-func (u *userService) Login(email string, password string) (string, error) {
-	panic("unimplemented")
+func (s *userService) Login(email string, password string) (string, error) {
+	user, err := s.userRepo.FindByEmail(email)
+	if err != nil {
+		return "", errors.New("email not registred")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		return "", errors.New("invalid password")
+	}
+
+	return pkg.GenerateJWT(user.ID)
 }
