@@ -37,6 +37,8 @@ func main() {
 		r.Post("/", authHandler.Login)
 	})
 
+	router.Get("/ws", handler.Websocket)
+
 	log.Println("Server is running in port: 3000")
 	http.ListenAndServe(":3000", router)
 }
