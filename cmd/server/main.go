@@ -8,6 +8,7 @@ import (
 	"github.com/azevedoguigo/thermosync-api/internal/handler"
 	"github.com/azevedoguigo/thermosync-api/internal/repository"
 	"github.com/azevedoguigo/thermosync-api/internal/service"
+	"github.com/azevedoguigo/thermosync-api/internal/websocket"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 )
@@ -38,6 +39,8 @@ func main() {
 	})
 
 	router.Get("/ws", handler.Websocket)
+
+	go websocket.HandleMessages()
 
 	log.Println("Server is running in port: 3000")
 	http.ListenAndServe(":3000", router)
