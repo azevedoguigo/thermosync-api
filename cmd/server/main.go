@@ -43,5 +43,9 @@ func main() {
 	go websocket.HandleMessages()
 
 	log.Println("Server is running in port: 3000")
-	http.ListenAndServe(":3000", router)
+
+	err := http.ListenAndServe(":3000", router)
+	if err != nil {
+		log.Fatalf("Error to start server: %s", err)
+	}
 }
