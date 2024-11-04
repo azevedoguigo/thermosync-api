@@ -6,9 +6,11 @@ import (
 
 	"github.com/azevedoguigo/thermosync-api/config"
 	"github.com/azevedoguigo/thermosync-api/internal/handler"
+	authMiddleware "github.com/azevedoguigo/thermosync-api/internal/middleware"
 	"github.com/azevedoguigo/thermosync-api/internal/repository"
 	"github.com/azevedoguigo/thermosync-api/internal/service"
 	"github.com/azevedoguigo/thermosync-api/internal/websocket"
+
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
@@ -41,7 +43,7 @@ func main() {
 
 	router.Route("/users", func(r chi.Router) {
 		r.Post("/", userHandler.CreateUser)
-		r.Get("/{id}", userHandler.FindUserByID)
+		r.With(authMiddleware.AuthMiddleware).Get("/{id}", userHandler.FindUserByID)
 	})
 
 	router.Route("/auth", func(r chi.Router) {
