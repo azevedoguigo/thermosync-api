@@ -30,12 +30,20 @@ func (s *userService) CreateUser(userDTO *contract.NewUserDTO) error {
 		return err
 	}
 
+	user, err := s.userRepo.FindByEmail(userDTO.Email)
+	if err != nil {
+		return err
+	}
+	if user != nil {
+		return errors.New("email already registred")
+	}
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userDTO.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
 
-	user := &domain.User{
+	user = &domain.User{
 		ID:        uuid.New(),
 		FirstName: userDTO.FirstName,
 		LastName:  userDTO.LastName,
