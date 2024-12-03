@@ -9,6 +9,7 @@ import (
 	"github.com/azevedoguigo/thermosync-api/pkg"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type UserService interface {
@@ -31,7 +32,7 @@ func (s *userService) CreateUser(userDTO *contract.NewUserDTO) error {
 	}
 
 	user, err := s.userRepo.FindByEmail(userDTO.Email)
-	if err != nil {
+	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
 	if user != nil {
